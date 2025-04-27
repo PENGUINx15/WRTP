@@ -23,7 +23,7 @@ public class TeleportEvent implements Listener {
     private final int cooldown;
 
     public TeleportEvent() {
-        this.config = new ConfigManager(Bukkit.getPluginManager().getPlugin("WRTP")); ;
+        this.config = new ConfigManager(Bukkit.getPluginManager().getPlugin("WRTP"));
         this.cooldown = config.getConfig("config.yml").getInt("cooldown");
         this.cooldowns = new HashMap<>();
     }
@@ -60,7 +60,7 @@ public class TeleportEvent implements Listener {
         int maxZ = config.getConfig("config.yml").getInt("channels."+channel+".range.maxZ");
         World world = Bukkit.getWorld(config.getConfig("config.yml").getString("channels."+channel+".world"));
         int x, z, y;
-
+        final Player playerFinal = player;
         do {
             x = getRandom(minX, maxX);
             z = getRandom(minZ, maxZ);
@@ -72,7 +72,15 @@ public class TeleportEvent implements Listener {
 
         setCooldown(player);
 
-        player.teleport(new Location(world, x + 0.5, y + 1, z + 0.5));
+        player.setInvulnerable(true);
+        int finalX = x;
+        int finalY = y;
+        int finalZ = z;
+        Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin("WRTP"), () -> {
+            player.teleport(new Location(world, finalX + 0.5, finalY + 1, finalZ + 0.5));
+            player.setInvulnerable(false);
+        }, 5L);
+
         MessageManager.sendMessage(player,
                 config.getConfig("config.yml").getString("channels."+channel+".message")
                         .replace("{x}", String.valueOf(x))
@@ -96,14 +104,21 @@ public class TeleportEvent implements Listener {
                     x = (int) (targetPlayer.getLocation().getX() + range * Math.cos(angle));
                     z = (int) (targetPlayer.getLocation().getZ() + range * Math.sin(angle));
 
-                    y = targetPlayer.getWorld().getHighestBlockYAt((int) x, (int) z);
+                    y = targetPlayer.getWorld().getHighestBlockYAt(x, z);
 
                 } while (isBlacklistedBlock(player.getWorld().getBlockAt(x, y-1, z).getType(), channel) &&
                         player.getWorld().getBlockAt(x, y + 1, z).getType() == Material.AIR &&
                         player.getWorld().getBlockAt(x, y + 2, z).getType() == Material.AIR);
                 setCooldown(player);
 
-                player.teleport(new Location(targetPlayer.getWorld(), x + 0.5, y + 1, z + 0.5));
+                player.setInvulnerable(true);
+                int finalX = x;
+                int finalY = y;
+                int finalZ = z;
+                Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin("WRTP"), () -> {
+                    player.teleport(new Location(targetPlayer.getWorld(), finalX + 0.5, finalY + 1, finalZ + 0.5));
+                    player.setInvulnerable(false);
+                }, 5L);
                 MessageManager.sendMessage(player,
                         (config.getConfig("config.yml").getString("channels."+channel+".message"))
                                 .replace("{x}", String.valueOf(x))
@@ -138,10 +153,17 @@ public class TeleportEvent implements Listener {
         Biome biome = world.getBlockAt(x, y-1, z).getBiome();
         setCooldown(player);
 
-        player.teleport(new Location(world, x + 0.5, y + 1, z + 0.5));
+        player.setInvulnerable(true);
+        int finalX = x;
+        int finalY = y;
+        int finalZ = z;
+        Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin("WRTP"), () -> {
+            player.teleport(new Location(world, finalX + 0.5, finalY + 1, finalZ + 0.5));
+            player.setInvulnerable(false);
+        }, 5L);
         MessageManager.sendMessage(player,
                 config.getConfig("config.yml").getString("channels."+channel+".message")
-                        .replace("{biome}", String.valueOf(biome.name()))
+                        .replace("{biome}", biome.name())
         );
     }
 

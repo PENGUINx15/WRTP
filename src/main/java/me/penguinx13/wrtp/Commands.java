@@ -10,9 +10,9 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 public class Commands implements CommandExecutor {
-    private ConfigManager config;
-    private WRTP plugin;
-    private TeleportEvent teleportEvent;
+    private final ConfigManager config;
+    private final WRTP plugin;
+    private final TeleportEvent teleportEvent;
 
 
     public Commands(WRTP plugin, ConfigManager config, TeleportEvent teleportEvent) {
@@ -32,7 +32,7 @@ public class Commands implements CommandExecutor {
                 }
 
                 String channel = args[0];
-                Player targetPlayer = null;
+                Player targetPlayer;
                 if (args.length >= 2) {
                     targetPlayer = Bukkit.getPlayer(args[1]);
                 } else {
