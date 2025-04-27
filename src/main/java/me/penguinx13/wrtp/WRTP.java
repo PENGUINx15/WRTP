@@ -5,7 +5,6 @@ import me.penguinx13.wapi.Managers.ConfigManager;
 
 public class WRTP extends JavaPlugin{
     public TeleportEvent teleportEvent;
-    private ConfigManager configManager;
 
     @Override
     public void onEnable() {
@@ -14,7 +13,7 @@ public class WRTP extends JavaPlugin{
         ConfigManager configManager = new ConfigManager(this);
         configManager.registerConfig("config.yml");
 
-        teleportEvent = new TeleportEvent(configManager);
+        teleportEvent = new TeleportEvent();
         getServer().getPluginManager().registerEvents(teleportEvent, this);
 
         getCommand("rtp").setExecutor(new Commands(this, configManager, teleportEvent));

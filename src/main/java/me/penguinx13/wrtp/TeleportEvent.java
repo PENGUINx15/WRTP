@@ -22,8 +22,8 @@ public class TeleportEvent implements Listener {
     private final Map<UUID, Long> cooldowns;
     private final int cooldown;
 
-    public TeleportEvent(ConfigManager config) {
-        this.config = config;
+    public TeleportEvent() {
+        this.config = new ConfigManager(Bukkit.getPluginManager().getPlugin("WRTP")); ;
         this.cooldown = config.getConfig("config.yml").getInt("cooldown");
         this.cooldowns = new HashMap<>();
     }
