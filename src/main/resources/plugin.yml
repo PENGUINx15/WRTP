@@ -1,3 +1,8 @@
 name: WRTP
 version: '${version}'
 main: me.penguinx13.wrtp.WRTP
+commands:
+  rtp:
+    description: ""
+  wrtp:
+    description: "admin command"
