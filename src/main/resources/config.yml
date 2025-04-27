@@ -1,0 +1,85 @@
+messages:
+  noPermission: "{message}You don't have permission to use this command."#{message|title|action|subtitle}
+  usage: "{message}Usage: /rtp <channel>"
+  unknownType: "{message}Unknown teleport type: {type}"
+  unknownChannel: "{message}Channel not found or has invalid configuration: {channel}"
+  noMinPlayers: "{message}The server does not have the required number of players"
+  noPlayerInWorld: "{message}There are no players in the world!"
+  cooldown: "{message}Wait {time} to teleport"
+  reloadMessage: "{message}Plugin reloaded"
+
+cooldown: 15 #secconds
+
+channels:
+  min:
+    type: DEFAULT
+    world: world
+    range:
+      maxX: 5000
+      minX: -5000
+      maxZ: 5000
+      minZ: -5000
+    blacklistedBlocks:
+      - "LAVA"
+      - "STATIONARY_LAVA"
+      - "WATER"
+      - "STATIONARY_WATER"
+    message: "{title}MINIMAL TELEPORT {message}You teleported to x:{x} y:{y} z{z} in world: {world}"#{message|title|action|subtitle}
+  normal:
+    type: DEFAULT
+    world: world
+    range:
+      maxX: 10000
+      minX: -10000
+      maxZ: 10000
+      minZ: -10000
+    blacklistedBlocks:
+      - "LAVA"
+      - "STATIONARY_LAVA"
+      - "WATER"
+      - "STATIONARY_WATER"
+    message: "{message}You teleported to x:{x} y:{y} z{z} in world: {world}"#{message|title|action|subtitle}
+  max:
+    type: DEFAULT
+    world: world
+    range:
+      maxX: 20000
+      minX: -20000
+      maxZ: 20000
+      minZ: -20000
+    blacklistedBlocks:
+      - "LAVA"
+      - "STATIONARY_LAVA"
+      - "WATER"
+      - "STATIONARY_WATER"
+    message: "{message}You teleported to x:{x} y:{y} z{z} in world: {world}"#{message|title|action|subtitle}
+  near:
+    type: NEARBY_PLAYERS
+    world: world
+    nearbyRange:
+      min: 10
+      max: 100
+    minOnline: 3
+    blacklistedBlocks:
+      - "LAVA"
+      - "STATIONARY_LAVA"
+      - "WATER"
+      - "STATIONARY_WATER"
+    message: "{message}You are teleported near the player {targetPlayer} to x:{x} y:{y} z{z} in world: {world}"#{message|title|action|subtitle}
+  biome:
+    type: BIOME
+    world: world
+    biomes:
+      - "DESERT"
+      - "DESERT_HILLS"
+    range:
+      maxX: 20000
+      minX: -20000
+      maxZ: 20000
+      minZ: -20000
+    blacklistedBlocks:
+      - "LAVA"
+      - "STATIONARY_LAVA"
+      - "WATER"
+      - "STATIONARY_WATER"
+    message: "{message}You are teleported to a biome:{biome}"#{message|title|action|subtitle}
