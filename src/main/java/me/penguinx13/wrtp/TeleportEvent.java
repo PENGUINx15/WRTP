@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class TeleportEvent implements Listener {
     private final ConfigManager config;
@@ -73,6 +72,7 @@ public class TeleportEvent implements Listener {
 
         player.setFallDistance(0.0f);
         player.teleport(new Location(world, x + 0.5, y + 1, z + 0.5));
+        assert world != null;
         MessageManager.sendMessage(player,
                 config.getConfig("config.yml").getString("channels."+channel+".message")
                         .replace("{x}", String.valueOf(x))
@@ -169,12 +169,12 @@ public class TeleportEvent implements Listener {
 
     private boolean isBlacklistedBlock(Material material, String channel) {
         List<String> blacklistedBlocks = config.getConfig("config.yml").getStringList("channels." + channel + ".blacklistedBlocks");
-        blacklistedBlocks = blacklistedBlocks.stream().map(String::toUpperCase).collect(Collectors.toList());
+        blacklistedBlocks = blacklistedBlocks.stream().map(String::toUpperCase).toList();
         return blacklistedBlocks.contains(material.toString());
     }
     private boolean isBiome(Biome biome, String channel) {
         List<String> biomes = config.getConfig("config.yml").getStringList("channels." + channel + ".biomes");
-        biomes = biomes.stream().map(String::toUpperCase).collect(Collectors.toList());
+        biomes = biomes.stream().map(String::toUpperCase).toList();
         return biomes.contains(biome.name());
     }
 

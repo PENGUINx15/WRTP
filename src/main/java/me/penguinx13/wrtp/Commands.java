@@ -8,6 +8,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 public class Commands implements CommandExecutor {
     private final ConfigManager config;
@@ -22,7 +23,7 @@ public class Commands implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, Command cmd, @NotNull String label, String[] args) {
 
         if (cmd.getName().equalsIgnoreCase("rtp")) {
             if (sender instanceof Player) {
@@ -72,8 +73,7 @@ public class Commands implements CommandExecutor {
         }
         if (cmd.getName().equalsIgnoreCase("wrtp")) {
             if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
-                if (sender instanceof Player) {
-                    Player player = (Player) sender;
+                if (sender instanceof Player player) {
                     if (sender.hasPermission("wrtp.reload")) {
                         plugin.getServer().getPluginManager().disablePlugin(plugin);
                         plugin.getServer().getPluginManager().enablePlugin(plugin);

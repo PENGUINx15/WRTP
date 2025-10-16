@@ -1,6 +1,7 @@
 name: WRTP
 version: '${version}'
 main: me.penguinx13.wrtp.WRTP
+api-version: '1.19'
 commands:
   rtp:
     description: ""
