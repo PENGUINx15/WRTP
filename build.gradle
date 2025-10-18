@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 group = 'me.PENGUINx13'
@@ -22,8 +23,8 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.19.4-R0.1-SNAPSHOT")
-
-    implementation 'com.github.PENGUINx15:WAPI:main-SNAPSHOT'
+    implementation "io.papermc:paperlib:1.0.7"
+    compileOnly 'com.github.PENGUINx15:WAPI:main-SNAPSHOT'
 }
 
 def targetJavaVersion = 17
@@ -51,4 +52,12 @@ processResources {
     filesMatching('plugin.yml') {
         expand props
     }
+}
+tasks.named('shadowJar') {
+    archiveClassifier.set('')
+    mergeServiceFiles() // объединяет service files, нужно для PaperLib
+}
+
+tasks.build {
+    dependsOn tasks.shadowJar
 }

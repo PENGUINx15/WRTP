@@ -19,11 +19,6 @@ channels:
       minX: -5000
       maxZ: 5000
       minZ: -5000
-    blacklistedBlocks:
-      - "LAVA"
-      - "STATIONARY_LAVA"
-      - "WATER"
-      - "STATIONARY_WATER"
     message: "{title}MINIMAL TELEPORT {message}You teleported to x:{x} y:{y} z{z} in world: {world}"#{message|title|action|subtitle}
   normal:
     type: DEFAULT
@@ -33,11 +28,6 @@ channels:
       minX: -10000
       maxZ: 10000
       minZ: -10000
-    blacklistedBlocks:
-      - "LAVA"
-      - "STATIONARY_LAVA"
-      - "WATER"
-      - "STATIONARY_WATER"
     message: "{message}You teleported to x:{x} y:{y} z{z} in world: {world}"#{message|title|action|subtitle}
   max:
     type: DEFAULT
@@ -47,11 +37,6 @@ channels:
       minX: -20000
       maxZ: 20000
       minZ: -20000
-    blacklistedBlocks:
-      - "LAVA"
-      - "STATIONARY_LAVA"
-      - "WATER"
-      - "STATIONARY_WATER"
     message: "{message}You teleported to x:{x} y:{y} z{z} in world: {world}"#{message|title|action|subtitle}
   near:
     type: NEARBY_PLAYERS
@@ -60,11 +45,6 @@ channels:
       min: 10
       max: 100
     minOnline: 3
-    blacklistedBlocks:
-      - "LAVA"
-      - "STATIONARY_LAVA"
-      - "WATER"
-      - "STATIONARY_WATER"
     message: "{message}You are teleported near the player {targetPlayer} to x:{x} y:{y} z{z} in world: {world}"#{message|title|action|subtitle}
   biome:
     type: BIOME
@@ -77,9 +57,7 @@ channels:
       minX: -20000
       maxZ: 20000
       minZ: -20000
-    blacklistedBlocks:
-      - "LAVA"
-      - "STATIONARY_LAVA"
-      - "WATER"
-      - "STATIONARY_WATER"
     message: "{message}You are teleported to a biome:{biome}"#{message|title|action|subtitle}
+blacklistedBlocks:
+  - "LAVA"
+  - "WATER"
