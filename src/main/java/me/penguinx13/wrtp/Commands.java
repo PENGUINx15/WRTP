@@ -2,6 +2,7 @@ package me.penguinx13.wrtp;
 
 import me.penguinx13.wapi.Managers.ConfigManager;
 import me.penguinx13.wapi.Managers.MessageManager;
+import me.penguinx13.wrtp.cache.ChunkScanner;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -72,28 +73,32 @@ public class Commands implements CommandExecutor {
             }
         }
         if (cmd.getName().equalsIgnoreCase("wrtp")) {
-            if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
-                if (sender instanceof Player player) {
+            if (sender instanceof Player player) {
+                if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
                     if (sender.hasPermission("wrtp.reload")) {
                         plugin.getServer().getPluginManager().disablePlugin(plugin);
                         plugin.getServer().getPluginManager().enablePlugin(plugin);
 
 
                         MessageManager.sendMessage(player, config.getConfig("config.yml").getString("messages.reloadMessage"));
-                        return true;
                     } else {
                         MessageManager.sendMessage(player, config.getConfig("config.yml").getString("messages.noPermission"));
-                        return true;
                     }
-                }else if(sender instanceof ConsoleCommandSender) {
+                    return true;
+                }
+            }else if(sender instanceof ConsoleCommandSender) {
+                if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
                     plugin.getServer().getPluginManager().disablePlugin(plugin);
                     plugin.getServer().getPluginManager().enablePlugin(plugin);
 
 
-                    MessageManager.sendLog(plugin, "info", config.getConfig("config.yml").getString("messages.reloadMessage"));
+                    plugin.getLogger().info(config.getConfig("config.yml").getString("messages.reloadMessage"));
                     return true;
+                }else if(args.length > 0 && args[0].equalsIgnoreCase("cache")){
+                    ChunkScanner.logProgress();
                 }
             }
+
         }
 
 

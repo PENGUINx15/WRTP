@@ -14,29 +14,20 @@ channels:
   min:
     type: DEFAULT
     world: world
-    range:
-      maxX: 5000
-      minX: -5000
-      maxZ: 5000
-      minZ: -5000
+    maxRadius: 5000
+    minRadius: 10
     message: "{title}MINIMAL TELEPORT {message}You teleported to x:{x} y:{y} z{z} in world: {world}"#{message|title|action|subtitle}
   normal:
     type: DEFAULT
     world: world
-    range:
-      maxX: 10000
-      minX: -10000
-      maxZ: 10000
-      minZ: -10000
+    maxRadius: 10000
+    minRadius: 10
     message: "{message}You teleported to x:{x} y:{y} z{z} in world: {world}"#{message|title|action|subtitle}
   max:
     type: DEFAULT
     world: world
-    range:
-      maxX: 20000
-      minX: -20000
-      maxZ: 20000
-      minZ: -20000
+    maxRadius: 20000
+    minRadius: 10
     message: "{message}You teleported to x:{x} y:{y} z{z} in world: {world}"#{message|title|action|subtitle}
   near:
     type: NEARBY_PLAYERS
@@ -52,12 +43,15 @@ channels:
     biomes:
       - "DESERT"
       - "DESERT_HILLS"
-    range:
-      maxX: 20000
-      minX: -20000
-      maxZ: 20000
-      minZ: -20000
+    maxRadius: 5000
+    minRadius: 10
     message: "{message}You are teleported to a biome:{biome}"#{message|title|action|subtitle}
 blacklistedBlocks:
   - "LAVA"
   - "WATER"
+cacheSett:
+  maxX: 30000
+  minX: -3000
+  maxZ: 30000
+  minZ: -30000
+  world: world
