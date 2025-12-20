@@ -10,21 +10,22 @@ import java.io.File;
 import java.util.Objects;
 
 public class WRTP extends JavaPlugin{
+    private static WRTP instance;
     public TeleportEvent teleportEvent;
-
+    public SQLiteManager sqliteManager;
     @Override
     public void onEnable() {
         getLogger().info("Plugin Enabled");
 
         ConfigManager configManager = new ConfigManager(this);
         configManager.registerConfig("config.yml");
+        instance =this;
+        sqliteManager = new SQLiteManager(new File("plugins/WRTP/cache"));
 
-        SQLiteManager db = new SQLiteManager(new File("plugins/WRTP/cache"));
-
-        teleportEvent = new TeleportEvent(db);
+        teleportEvent = new TeleportEvent();
         getServer().getPluginManager().registerEvents(teleportEvent, this);
 
-        new ChunkScanner(db,
+        new ChunkScanner(sqliteManager,
                 Objects.requireNonNull(Bukkit.getWorld(Objects.requireNonNull(configManager.getConfig("config.yml").getString("cacheSett.world")))),
                 configManager.getConfig("config.yml").getInt("cacheSett.minX"),
                 configManager.getConfig("config.yml").getInt("cacheSett.maxX"),
@@ -34,5 +35,10 @@ public class WRTP extends JavaPlugin{
         Objects.requireNonNull(getCommand("rtp")).setExecutor(new Commands(this, configManager, teleportEvent));
         Objects.requireNonNull(getCommand("wrtp")).setExecutor(new Commands(this, configManager, teleportEvent));
     }
-
+    public static WRTP getInstance() {
+        return instance;
+    }
+    public SQLiteManager getDatabase() {
+        return sqliteManager;
+    }
 }

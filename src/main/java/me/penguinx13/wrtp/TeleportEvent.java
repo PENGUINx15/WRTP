@@ -18,8 +18,8 @@ public class TeleportEvent implements Listener {
     private final int cooldown;
     private final SQLiteManager db;
 
-    public TeleportEvent(SQLiteManager db) {
-        this.db = db;
+    public TeleportEvent() {
+        this.db = WRTP.getInstance().getDatabase();
         this.config = new ConfigManager(Bukkit.getPluginManager().getPlugin("WRTP"));
         this.cooldown = config.getConfig("config.yml").getInt("cooldown");
     }
