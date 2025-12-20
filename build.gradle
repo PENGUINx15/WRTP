@@ -55,7 +55,7 @@ processResources {
 }
 tasks.named('shadowJar') {
     archiveClassifier.set('')
-    mergeServiceFiles() // объединяет service files, нужно для PaperLib
+    mergeServiceFiles()
 }
 
 tasks.build {
