@@ -2,7 +2,8 @@ package me.penguinx13.wrtp;
 
 import me.penguinx13.wapi.Managers.ConfigManager;
 import me.penguinx13.wapi.Managers.MessageManager;
-import me.penguinx13.wrtp.cache.ChunkScanner;
+import me.penguinx13.wrtp.scanner.ChunkScanner;
+import me.penguinx13.wrtp.scanner.ScanStatus;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -91,12 +92,36 @@ public class Commands implements CommandExecutor {
                     plugin.getServer().getPluginManager().disablePlugin(plugin);
                     plugin.getServer().getPluginManager().enablePlugin(plugin);
 
-
                     plugin.getLogger().info(config.getConfig("config.yml").getString("messages.reloadMessage"));
                     return true;
-                }else if(args.length > 0 && args[0].equalsIgnoreCase("cache")){
-                    ChunkScanner.logProgress();
+                }else if (args.length == 2 && args[0].equalsIgnoreCase("scan")
+                        && args[1].equalsIgnoreCase("status")) {
+
+                    ScanStatus status = plugin.getScanner().getStatus();
+
+                    sender.sendMessage("§6[WRTP] §fСтатус сканирования:");
+                    sender.sendMessage("§7• Активен: §e" + status.running());
+                    sender.sendMessage("§7• Пауза (TPS): §e" + status.paused());
+                    sender.sendMessage("§7• Точки: §a" + status.points()
+                            + " §7/ §a" + status.target());
+
+                    double percent = (status.points() / (double) status.target()) * 100;
+                    sender.sendMessage(String.format("§7• Прогресс: §a%.2f%%", percent));
+                    sender.sendMessage(String.format("§7• Скорость: §a%.2f точек/сек",
+                            status.pointsPerSecond()));
+
+                    return true;
+                }else if (args.length == 2 && args[0].equalsIgnoreCase("scan")
+                        && args[1].equalsIgnoreCase("stop")) {
+                    plugin.getScanner().stop();
+                }else if (args.length == 2 && args[0].equalsIgnoreCase("scan")
+                        && args[1].equalsIgnoreCase("resume")) {
+                    plugin.getScanner().resume();
+                }else if (args.length == 2 && args[0].equalsIgnoreCase("scan")
+                        && args[1].equalsIgnoreCase("pause")) {
+                    plugin.getScanner().pause();
                 }
+
             }
 
         }

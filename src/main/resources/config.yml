@@ -55,3 +55,4 @@ cacheSett:
   maxZ: 30000
   minZ: -30000
   world: world
+  minTPS: 18
