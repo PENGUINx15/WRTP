@@ -126,19 +126,12 @@ public class TeleportEvent implements Listener {
         int worldId = CachedBlockData.getOrCreateWorldId(world.getName());
 
         for (int i = 0; i < 100; i++) {
-            int x = getRandom(minX, maxX);
-            int z = getRandom(minZ, maxZ);
-
-            CachedBlockData data = db.getCachedBlock(worldId, x, z);
+            CachedBlockData data = db.getRandomPointInRange(worldId, minX, maxX, minZ, maxZ);
             if (data == null) continue;
+            if (checkBiome && !isBiome(Biome.valueOf(data.biomeName), channel)) continue;
+            if (!isSafeBlock(data.blockName)) continue;
 
-            String biomeName = CachedBlockData.getBiomeName(data.biomeId);
-            String blockName = CachedBlockData.getBlockName(data.blockId);
-
-            if (checkBiome && !isBiome(Biome.valueOf(biomeName), channel)) continue;
-            if (!isSafeBlock(blockName)) continue;
-
-            Location loc = new Location(world, x + 0.5, data.highestY + 1, z + 0.5);
+            Location loc = new Location(world, data.x + 0.5, data.highestY + 1, data.z + 0.5);
             Bukkit.getLogger().info("✅ Найдено безопасное место: " + loc);
             return loc;
         }
@@ -146,6 +139,7 @@ public class TeleportEvent implements Listener {
         Bukkit.getLogger().warning("⚠ Не удалось найти безопасное место после 100 попыток!");
         return null;
     }
+
 
     // ------------------- HELPERS -------------------
 

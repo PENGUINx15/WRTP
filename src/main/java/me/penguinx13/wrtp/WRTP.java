@@ -1,11 +1,13 @@
 package me.penguinx13.wrtp;
 
+import io.papermc.lib.PaperLib;
 import me.penguinx13.wrtp.scanner.ChunkScanner;
 import me.penguinx13.wrtp.cache.SQLiteManager;
 import me.penguinx13.wapi.Managers.ConfigManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.util.Objects;
@@ -43,7 +45,12 @@ public class WRTP extends JavaPlugin {
         } else {
             scanner = new ChunkScanner(this, world, configManager);
         }
-        scanner.start();
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                scanner.start();
+            }
+        }.runTaskLater(this, 20L * 10); // 10 секунд
 
         /* ---------- COMMANDS ---------- */
         Commands commands = new Commands(this, configManager, teleportEvent);
