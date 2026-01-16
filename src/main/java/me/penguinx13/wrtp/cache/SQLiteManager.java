@@ -59,17 +59,6 @@ public class SQLiteManager {
         }
     }
 
-    public int getPointCount(int worldId) {
-        String sql = "SELECT COUNT(*) FROM rtp_blocks WHERE worldId=?";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, worldId);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) return rs.getInt(1);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
     public List<CachedBlockData> loadAllPoints(int worldId) {
         List<CachedBlockData> list = new ArrayList<>();
         String sql = "SELECT x, z, highestY, biomeId, blockId FROM rtp_blocks WHERE worldId=?";
@@ -92,44 +81,54 @@ public class SQLiteManager {
         return list;
     }
 
-    public CachedBlockData getCachedBlock(int worldId, int x, int z) {
-        String sql = "SELECT highestY, biomeId, blockId FROM rtp_blocks WHERE worldId=? AND x=? AND z=? LIMIT 1";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, worldId);
-            ps.setInt(2, x);
-            ps.setInt(3, z);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return new CachedBlockData(
-                        worldId,
-                        x,
-                        z,
-                        rs.getInt("highestY"),
-                        rs.getString("biomeId"),
-                        rs.getString("blockId")
-                );
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public CachedBlockData getRandomPointInRange(int worldId, int minX, int maxX, int minZ, int maxZ) {
-        String sql = """
+    public CachedBlockData getRandomPoint(
+            int worldId,
+            int minRadius,
+            int maxRadius,
+            List<String> biomes
+    ) {
+        StringBuilder sql = new StringBuilder("""
         SELECT worldId, x, z, highestY, biomeId, blockId
         FROM rtp_blocks
-        WHERE worldId=? AND x BETWEEN ? AND ? AND z BETWEEN ? AND ?
-        ORDER BY RANDOM()
-        LIMIT 1
-    """;
+        WHERE worldId = ?
+          AND x BETWEEN ? AND ?
+          AND z BETWEEN ? AND ?
+          AND NOT (x BETWEEN ? AND ? AND z BETWEEN ? AND ?)
+    """);
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, worldId);
-            ps.setInt(2, minX);
-            ps.setInt(3, maxX);
-            ps.setInt(4, minZ);
-            ps.setInt(5, maxZ);
+        if (biomes != null && !biomes.isEmpty()) {
+            sql.append(" AND biomeId IN (");
+            for (int i = 0; i < biomes.size(); i++) {
+                sql.append("?");
+                if (i < biomes.size() - 1) sql.append(",");
+            }
+            sql.append(")");
+        }
+
+        sql.append(" ORDER BY RANDOM() LIMIT 1");
+
+        try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            int idx = 1;
+
+            ps.setInt(idx++, worldId);
+
+            // внешний квадрат
+            ps.setInt(idx++, -maxRadius);
+            ps.setInt(idx++,  maxRadius);
+            ps.setInt(idx++, -maxRadius);
+            ps.setInt(idx++,  maxRadius);
+
+            // внутренняя дырка
+            ps.setInt(idx++, -minRadius);
+            ps.setInt(idx++,  minRadius);
+            ps.setInt(idx++, -minRadius);
+            ps.setInt(idx++,  minRadius);
+
+            if (biomes != null && !biomes.isEmpty()) {
+                for (String biome : biomes) {
+                    ps.setString(idx++, biome);
+                }
+            }
 
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -147,11 +146,5 @@ public class SQLiteManager {
         }
 
         return null;
-    }
-
-    public void close() {
-        try {
-            if (connection != null) connection.close();
-        } catch (SQLException ignored) {}
     }
 }

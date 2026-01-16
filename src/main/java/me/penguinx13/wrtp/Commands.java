@@ -2,7 +2,6 @@ package me.penguinx13.wrtp;
 
 import me.penguinx13.wapi.Managers.ConfigManager;
 import me.penguinx13.wapi.Managers.MessageManager;
-import me.penguinx13.wrtp.scanner.ChunkScanner;
 import me.penguinx13.wrtp.scanner.ScanStatus;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -109,7 +108,6 @@ public class Commands implements CommandExecutor {
                     sender.sendMessage(String.format("§7• Прогресс: §a%.2f%%", percent));
                     sender.sendMessage(String.format("§7• Скорость: §a%.2f точек/сек",
                             status.pointsPerSecond()));
-
                     return true;
                 }else if (args.length == 2 && args[0].equalsIgnoreCase("scan")
                         && args[1].equalsIgnoreCase("stop")) {

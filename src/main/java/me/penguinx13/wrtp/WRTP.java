@@ -1,6 +1,5 @@
 package me.penguinx13.wrtp;
 
-import io.papermc.lib.PaperLib;
 import me.penguinx13.wrtp.scanner.ChunkScanner;
 import me.penguinx13.wrtp.cache.SQLiteManager;
 import me.penguinx13.wapi.Managers.ConfigManager;
@@ -15,8 +14,9 @@ import java.util.Objects;
 public class WRTP extends JavaPlugin {
 
     private static WRTP instance;
-    private SQLiteManager sqliteManager;
+    private static SQLiteManager sqliteManager;
     private ChunkScanner scanner;
+    private ConfigManager configManager;
 
     @Override
     public void onEnable() {
@@ -24,7 +24,7 @@ public class WRTP extends JavaPlugin {
         getLogger().info("Plugin Enabled");
 
         /* ---------- CONFIG ---------- */
-        ConfigManager configManager = new ConfigManager(this);
+        configManager = new ConfigManager(this);
         configManager.registerConfig("config.yml");
 
         /* ---------- DATABASE ---------- */
@@ -67,16 +67,18 @@ public class WRTP extends JavaPlugin {
     }
 
     /* ---------- GETTERS ---------- */
-
     public static WRTP getInstance() {
         return instance;
     }
 
-    public SQLiteManager getDatabase() {
+    public static SQLiteManager getDatabase() {
         return sqliteManager;
     }
 
     public ChunkScanner getScanner() {
         return scanner;
+    }
+    public ConfigManager getConfigManager() {
+        return configManager;
     }
 }

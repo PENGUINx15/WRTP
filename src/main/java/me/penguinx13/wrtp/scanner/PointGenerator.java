@@ -1,5 +1,6 @@
 package me.penguinx13.wrtp.scanner;
 
+import me.penguinx13.wrtp.WRTP;
 import me.penguinx13.wrtp.cache.CachedBlockData;
 
 import java.util.ArrayList;
@@ -8,17 +9,27 @@ import java.util.Random;
 
 public class PointGenerator {
 
-    private static final int TARGET_POINTS = 10_000;
-    private static final int MIN_DISTANCE = 128;
-    private static final int RANGE = 30_000;
+    private final int minDistance;
+    private final int range;
 
     private final Random random = new Random();
     private final List<Point> points = new ArrayList<>();
 
+    public PointGenerator() {
+        this.minDistance = WRTP.getInstance()
+                .getConfigManager()
+                .getConfig("config.yml")
+                .getInt("cacheSett.pointBetween", 128);
+
+        this.range = WRTP.getInstance()
+                .getConfigManager()
+                .getConfig("config.yml")
+                .getInt("cacheSett.range", 30000);
+    }
     public Point generateNext() {
         for (int i = 0; i < 1000; i++) {
-            int x = random.nextInt(RANGE * 2) - RANGE;
-            int z = random.nextInt(RANGE * 2) - RANGE;
+            int x = random.nextInt(range * 2) - range;
+            int z = random.nextInt(range * 2) - range;
 
             Point candidate = new Point(x, 0, z);
             if (isFarEnough(candidate)) {
@@ -38,7 +49,7 @@ public class PointGenerator {
         for (Point p : points) {
             double dx = p.x - candidate.x;
             double dz = p.z - candidate.z;
-            if ((dx * dx + dz * dz) < (MIN_DISTANCE * MIN_DISTANCE)) {
+            if ((dx * dx + dz * dz) < (minDistance * minDistance)) {
                 return false;
             }
         }
@@ -47,10 +58,6 @@ public class PointGenerator {
 
     public void addPoint(Point point) {
         points.add(point);
-    }
-
-    public boolean isFinished() {
-        return points.size() >= TARGET_POINTS;
     }
 
     public static class Point {

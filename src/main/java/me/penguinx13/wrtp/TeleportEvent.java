@@ -6,10 +6,12 @@ import me.penguinx13.wrtp.cache.CachedBlockData;
 import me.penguinx13.wrtp.cache.SQLiteManager;
 import org.bukkit.*;
 import org.bukkit.block.Biome;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class TeleportEvent implements Listener {
 
@@ -19,7 +21,7 @@ public class TeleportEvent implements Listener {
     private final SQLiteManager db;
 
     public TeleportEvent() {
-        this.db = WRTP.getInstance().getDatabase();
+        this.db = WRTP.getDatabase();
         this.config = new ConfigManager(Bukkit.getPluginManager().getPlugin("WRTP"));
         this.cooldown = config.getConfig("config.yml").getInt("cooldown");
     }
@@ -53,12 +55,10 @@ public class TeleportEvent implements Listener {
         World world = getWorldFromConfig(channel);
         if (world == null) return;
 
-        int minX = config.getConfig("config.yml").getInt("channels." + channel + ".range.minX");
-        int maxX = config.getConfig("config.yml").getInt("channels." + channel + ".range.maxX");
-        int minZ = config.getConfig("config.yml").getInt("channels." + channel + ".range.minZ");
-        int maxZ = config.getConfig("config.yml").getInt("channels." + channel + ".range.maxZ");
+        int maxRange = config.getConfig("config.yml").getInt("channels." + channel + ".maxRange");
+        int minRange = config.getConfig("config.yml").getInt("channels." + channel + ".minRange");
 
-        Location safeLocation = findSafeLocation(world, minX, maxX, minZ, maxZ, channel, false);
+        Location safeLocation = findSafeLocation(world, maxRange, minRange, channel, false);
         if (safeLocation == null) {
             MessageManager.sendMessage(player, config.getConfig("config.yml").getString("messages.noSafeLocation"));
             return;
@@ -70,47 +70,45 @@ public class TeleportEvent implements Listener {
     // ------------------- NEARBY TYPE -------------------
 
     private void nearbyType(Player player, String channel) {
-        int minRange = config.getConfig("config.yml").getInt("channels." + channel + ".nearbyRange.min");
-        int maxRange = config.getConfig("config.yml").getInt("channels." + channel + ".nearbyRange.max");
+        World world = player.getWorld();
+        int minRange = config.getConfig("config.yml").getInt("channels." + channel + ".minRange");
+        int maxRange = config.getConfig("config.yml").getInt("channels." + channel + ".maxRange");
         int minOnline = config.getConfig("config.yml").getInt("channels." + channel + ".minOnline");
 
-        if (Bukkit.getOnlinePlayers().size() < minOnline) {
-            MessageManager.sendMessage(player, config.getConfig("config.yml").getString("messages.noMinPlayers"));
+        if (world.getPlayers().size() < minOnline) {
+            MessageManager.sendMessage(player,
+                    config.getConfig("config.yml").getString("messages.noMinPlayers"));
             return;
         }
-
         Player target = findRandomNearbyPlayer(player);
         if (target == null) {
-            MessageManager.sendMessage(player, config.getConfig("config.yml").getString("messages.noPlayerInWorld"));
+            MessageManager.sendMessage(player,
+                    config.getConfig("config.yml").getString("messages.noPlayerInWorld"));
+            return;
+        }
+        Location loc = findSafeLocationNearPlayer(
+                target,
+                minRange,
+                maxRange
+        );
+        if (loc == null) {
+            MessageManager.sendMessage(player,
+                    config.getConfig("config.yml").getString("messages.noSafeLocation"));
             return;
         }
 
-        double angle = Math.toRadians(new Random().nextDouble() * 360);
-        int range = getRandom(minRange, maxRange);
-        int x = (int) (target.getLocation().getX() + range * Math.cos(angle));
-        int z = (int) (target.getLocation().getZ() + range * Math.sin(angle));
-
-        Location safeLocation = findSafeLocation(player.getWorld(), x, x, z, z, channel, false);
-        if (safeLocation == null) {
-            MessageManager.sendMessage(player, config.getConfig("config.yml").getString("messages.noSafeLocation"));
-            return;
-        }
-
-        teleportAndNotify(player, safeLocation, channel, target.getName());
+        teleportAndNotify(player, loc, channel, target.getName());
     }
 
     // ------------------- BIOME TYPE -------------------
-
     private void biomeType(Player player, String channel) {
         World world = getWorldFromConfig(channel);
         if (world == null) return;
 
-        int minX = config.getConfig("config.yml").getInt("channels." + channel + ".range.minX");
-        int maxX = config.getConfig("config.yml").getInt("channels." + channel + ".range.maxX");
-        int minZ = config.getConfig("config.yml").getInt("channels." + channel + ".range.minZ");
-        int maxZ = config.getConfig("config.yml").getInt("channels." + channel + ".range.maxZ");
+        int maxRange = config.getConfig("config.yml").getInt("channels." + channel + ".maxRange");
+        int minRange = config.getConfig("config.yml").getInt("channels." + channel + ".minRange");
 
-        Location safeLocation = findSafeLocation(world, minX, maxX, minZ, maxZ, channel, true);
+        Location safeLocation = findSafeLocation(world, maxRange, minRange, channel, true);
         if (safeLocation == null) {
             MessageManager.sendMessage(player, config.getConfig("config.yml").getString("messages.noSafeLocation"));
             return;
@@ -120,29 +118,59 @@ public class TeleportEvent implements Listener {
         teleportAndNotify(player, safeLocation, channel, biome.name());
     }
 
-    // ------------------- SAFE LOCATION SEARCH -------------------
-
-    private Location findSafeLocation(World world, int minX, int maxX, int minZ, int maxZ, String channel, boolean checkBiome) {
+    private Location findSafeLocation(World world, int maxRange, int minRange, String channel, boolean checkBiome) {
         int worldId = CachedBlockData.getOrCreateWorldId(world.getName());
+        List<String> biomes = null;
+        if (checkBiome) {
+            biomes = config.getConfig("config.yml")
+                    .getStringList("channels." + channel + ".biomes");
+        }
+        for (int i = 0; i < 100; i++) {
+            CachedBlockData data = db.getRandomPoint(
+                    worldId,
+                    minRange,
+                    maxRange,
+                    biomes
+            );
+            if (data == null) continue;
+            return new Location(
+                    world,
+                    data.x + 0.5,
+                    data.highestY + 1,
+                    data.z + 0.5
+            );
+        }
+        return null;
+    }
+    private Location findSafeLocationNearPlayer(
+            Player center,
+            int minRange,
+            int maxRange
+    ) {
+        World world = center.getWorld();
+        Location base = center.getLocation();
 
         for (int i = 0; i < 100; i++) {
-            CachedBlockData data = db.getRandomPointInRange(worldId, minX, maxX, minZ, maxZ);
-            if (data == null) continue;
-            if (checkBiome && !isBiome(Biome.valueOf(data.biomeName), channel)) continue;
-            if (!isSafeBlock(data.blockName)) continue;
+            double angle = ThreadLocalRandom.current().nextDouble(0, Math.PI * 2);
+            int radius = ThreadLocalRandom.current().nextInt(minRange, maxRange + 1);
 
-            Location loc = new Location(world, data.x + 0.5, data.highestY + 1, data.z + 0.5);
-            Bukkit.getLogger().info("✅ Найдено безопасное место: " + loc);
-            return loc;
+            int x = base.getBlockX() + (int) (Math.cos(angle) * radius);
+            int z = base.getBlockZ() + (int) (Math.sin(angle) * radius);
+
+            if (!world.isChunkLoaded(x >> 4, z >> 4)) continue;
+
+            int y = world.getHighestBlockYAt(x, z);
+            Block ground = world.getBlockAt(x, y - 1, z);
+
+            if (ground.isSolid()) continue;
+
+            return new Location(world, x + 0.5, y, z + 0.5);
         }
 
-        Bukkit.getLogger().warning("⚠ Не удалось найти безопасное место после 100 попыток!");
         return null;
     }
 
-
     // ------------------- HELPERS -------------------
-
     private void teleportAndNotify(Player player, Location loc, String channel, String extra) {
         setCooldown(player);
         player.setFallDistance(0.0f);
@@ -162,17 +190,6 @@ public class TeleportEvent implements Listener {
         MessageManager.sendMessage(player, msg);
     }
 
-    private boolean isSafeBlock(String blockName) {
-        Material mat = Material.getMaterial(blockName);
-        return mat != null && mat.isSolid() && !mat.isAir()
-                && mat != Material.LAVA && mat != Material.WATER;
-    }
-
-    private boolean isBiome(Biome biome, String channel) {
-        List<String> biomes = config.getConfig("config.yml").getStringList("channels." + channel + ".biomes");
-        return biomes.stream().map(String::toUpperCase).toList().contains(biome.name());
-    }
-
     private void setCooldown(Player player) {
         cooldowns.put(player.getUniqueId(), System.currentTimeMillis() / 1000);
     }
@@ -187,13 +204,17 @@ public class TeleportEvent implements Listener {
         return Math.max(0, cooldown - (int) (System.currentTimeMillis() / 1000 - start));
     }
 
-    private int getRandom(int min, int max) {
-        return min + new Random().nextInt(max - min + 1);
-    }
-
     private Player findRandomNearbyPlayer(Player player) {
-        List<Player> players = new ArrayList<>(player.getWorld().getPlayers());
-        return players.isEmpty() ? null : players.get(new Random().nextInt(players.size()));
+        List<Player> candidates = new ArrayList<>();
+
+        for (Player p : player.getWorld().getPlayers()) {
+            if (p.equals(player)) continue;
+            candidates.add(p);
+        }
+
+        if (candidates.isEmpty()) return null;
+
+        return candidates.get(ThreadLocalRandom.current().nextInt(candidates.size()));
     }
 
     private World getWorldFromConfig(String channel) {

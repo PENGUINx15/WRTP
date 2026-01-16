@@ -11,33 +11,35 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public final class ChunkScanner {
 
-    private static final int TARGET_POINTS = 10_000;
-
     private final WRTP plugin;
     private final World world;
     private final ConfigManager configManager;
     private final PointGenerator pointGenerator = new PointGenerator();
     private final ScanTask scanTask;
 
+    private final int TARGET_POINTS;
+
     private final AtomicInteger validPoints = new AtomicInteger(0);
 
     private boolean running = false;
     private boolean paused = false;
-    private boolean scanning = false;
+    private static final int MAX_IN_FLIGHT = 8;
+    private final AtomicInteger inFlight = new AtomicInteger(0);
     private long startTime;
 
     public ChunkScanner(WRTP plugin, World world, ConfigManager configManager) {
         this.plugin = plugin;
         this.world = world;
         this.configManager = configManager;
-        this.scanTask = new ScanTask(plugin, world);
+        this.scanTask = new ScanTask(world);
+        this.TARGET_POINTS = configManager.getConfig("config.yml").getInt("cacheSett.pointCount", 10_000);
     }
 
     /* ===================== PUBLIC API ===================== */
     public void start() {
         int worldId = CachedBlockData.getOrCreateWorldId(world.getName());
         
-        List<CachedBlockData> existing = plugin.getDatabase().loadAllPoints(worldId);
+        List<CachedBlockData> existing = WRTP.getDatabase().loadAllPoints(worldId);
         pointGenerator.loadExisting(existing);
         validPoints.set(existing.size());
 
@@ -93,53 +95,38 @@ public final class ChunkScanner {
     /* ===================== CORE ===================== */
 
     private void scanPoint() {
-        if (!running || paused || scanning) return;
+        if (!running || paused) return;
 
         double minTps = configManager.getConfig("config.yml")
                 .getDouble("cacheSett.minTPS", 18.0);
 
         if (getTPS() < minTps) {
-            paused = true;
-            Bukkit.getScheduler().runTaskLater(plugin, this::scanPoint, 20L);
+            Bukkit.getScheduler().runTaskLater(plugin, this::scanPoint, 5L);
             return;
         }
 
-        paused = false;
+        while (inFlight.get() < MAX_IN_FLIGHT && validPoints.get() < TARGET_POINTS) {
+            PointGenerator.Point point = pointGenerator.generateNext();
+            if (point == null) break;
 
-        if (validPoints.get() >= TARGET_POINTS) {
-            finish();
-            return;
+            inFlight.incrementAndGet();
+
+            scanTask.scan(
+                    point,
+                    data -> {
+                        WRTP.getDatabase().insertBlock(data);
+                        pointGenerator.addPoint(point);
+
+                        int count = validPoints.incrementAndGet();
+                        if (count % 500 == 0 || count == TARGET_POINTS) {
+                            logProgress(count);
+                        }
+                    },
+                    inFlight::decrementAndGet
+            );
         }
 
-        PointGenerator.Point point = pointGenerator.generateNext();
-        if (point == null) {
-            Bukkit.getScheduler().runTaskLater(plugin, this::scanPoint, 1L);
-            return;
-        }
-
-        scanning = true;
-
-        scanTask.scan(
-                point,
-                data -> {
-                    plugin.getDatabase().insertBlock(data);
-                    pointGenerator.addPoint(point);
-
-                    int count = validPoints.incrementAndGet();
-                    if (count % 500 == 0 || count == TARGET_POINTS) {
-                        logProgress(count);
-                    }
-                },
-                () -> {
-                    scanning = false;
-                    Bukkit.getScheduler().runTask(plugin, this::scanPoint);
-                }
-        );
-    }
-
-    private void finish() {
-        running = false;
-        Bukkit.getLogger().info("[WRTP] ✔ Сканирование завершено. Точек: " + validPoints.get());
+        Bukkit.getScheduler().runTaskLater(plugin, this::scanPoint, 1L);
     }
 
     /* ===================== UTILS ===================== */

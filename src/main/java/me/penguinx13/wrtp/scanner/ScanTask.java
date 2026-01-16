@@ -1,7 +1,6 @@
 package me.penguinx13.wrtp.scanner;
 
 import io.papermc.lib.PaperLib;
-import me.penguinx13.wrtp.WRTP;
 import me.penguinx13.wrtp.cache.CachedBlockData;
 import org.bukkit.*;
 
@@ -9,11 +8,9 @@ import java.util.function.Consumer;
 
 public final class ScanTask {
 
-    private final WRTP plugin;
     private final World world;
 
-    public ScanTask(WRTP plugin, World world) {
-        this.plugin = plugin;
+    public ScanTask(World world) {
         this.world = world;
     }
 
@@ -30,7 +27,8 @@ public final class ScanTask {
                 if (chunk == null) return;
 
                 ChunkSnapshot snap = chunk.getChunkSnapshot(true, true, false);
-                int y = world.getHighestBlockYAt(point.x, point.z);
+
+                int y = snap.getHighestBlockYAt(point.x & 15, point.z & 15);
                 Material block = snap.getBlockType(point.x & 15, y - 1, point.z & 15);
 
                 if (!isSafe(block)) return;
