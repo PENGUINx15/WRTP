@@ -24,7 +24,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.19.4-R0.1-SNAPSHOT")
     implementation "io.papermc:paperlib:1.0.7"
-    compileOnly 'com.github.PENGUINx15:WAPI:main-SNAPSHOT'
+    compileOnly "com.github.PENGUINx15.WAPI:WAPI:main-SNAPSHOT"
 }
 
 def targetJavaVersion = 17

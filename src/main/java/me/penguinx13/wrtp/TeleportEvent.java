@@ -1,7 +1,7 @@
 package me.penguinx13.wrtp;
 
-import me.penguinx13.wapi.Managers.ConfigManager;
-import me.penguinx13.wapi.Managers.MessageManager;
+import me.penguinx13.wapi.managers.ConfigManager;
+import me.penguinx13.wapi.managers.MessageManager;
 import me.penguinx13.wrtp.cache.CachedBlockData;
 import me.penguinx13.wrtp.cache.SQLiteManager;
 import org.bukkit.*;

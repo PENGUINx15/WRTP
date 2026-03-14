@@ -1,6 +1,6 @@
 package me.penguinx13.wrtp.scanner;
 
-import me.penguinx13.wapi.Managers.ConfigManager;
+import me.penguinx13.wapi.managers.ConfigManager;
 import me.penguinx13.wrtp.WRTP;
 import me.penguinx13.wrtp.cache.CachedBlockData;
 import org.bukkit.Bukkit;

@@ -1,8 +1,8 @@
 package me.penguinx13.wrtp;
 
+import me.penguinx13.wapi.managers.ConfigManager;
 import me.penguinx13.wrtp.scanner.ChunkScanner;
 import me.penguinx13.wrtp.cache.SQLiteManager;
-import me.penguinx13.wapi.Managers.ConfigManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;

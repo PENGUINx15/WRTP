@@ -1,7 +1,7 @@
 package me.penguinx13.wrtp;
 
-import me.penguinx13.wapi.Managers.ConfigManager;
-import me.penguinx13.wapi.Managers.MessageManager;
+import me.penguinx13.wapi.managers.ConfigManager;
+import me.penguinx13.wapi.managers.MessageManager;
 import me.penguinx13.wrtp.scanner.ScanStatus;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -27,8 +27,7 @@ public class Commands implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, Command cmd, @NotNull String label, String[] args) {
 
         if (cmd.getName().equalsIgnoreCase("rtp")) {
-            if (sender instanceof Player) {
-                Player player = (Player) sender;
+            if (sender instanceof Player player) {
                 if (args.length < 1) {
                     MessageManager.sendMessage(player, config.getConfig("config.yml").getString("messages.usage"));
                 }
